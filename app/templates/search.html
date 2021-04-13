@@ -19,11 +19,23 @@
             </h1>
             
             <br><br>
-            
-            <div class="form-group">
-                <input id="input" type="text" name="search" class="form-control" placeholder="Your Input">
+            <div>
+                <form class="form-inline" novalidate>
+                    <div class="input-group">
+                        <input name="search" type="text" class="form-control" id="origin" placeholder="Origin" required>
+                    </div>
+                  
+                    <div class="input-group">
+                      <input name="search" type="text" class="form-control" id="destination" placeholder="Destination" required>
+                    </div>
+                  
+                    <div class="input-group">
+                        <input name="search" type="text" class="form-control" id="input" placeholder="What's your vibe?">
+                    </div>
+                  
+                    <button type="submit" class="btn btn-info">Go!</button>
+                  </form>
             </div>
-            <button type="submit" class="btn btn-info"> Go! </button>
         </form>
         <form class="form-inline global-search">
         {% if data %}
