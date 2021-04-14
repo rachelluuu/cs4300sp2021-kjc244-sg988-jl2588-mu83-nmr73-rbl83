@@ -7,13 +7,16 @@ net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu:
 
 @irsystem.route('/', methods=['GET'])
 def search():
-	query = request.args.get('search')
-	if not query:
+	origin = request.args.get('origin')
+	dest = request.args.get('destination')
+	vibe = request.args.get('vibe')
+	if not origin or not dest:
 		data = []
-		output_message = ''
+		output_message = 'Make sure to put in an orgin and destination'
 	else:
-		output_message = "Your search: " + query
-		data = range(5)
+		output_message = "Check out these songs for your next trip from " + origin + " to " + dest + " with " + vibe
+		data = range(5) 
+		#TODO set data equal to API function calls
 	return render_template('search.html', name=project_name, netid=net_id, output_message=output_message, data=data)
 
 
