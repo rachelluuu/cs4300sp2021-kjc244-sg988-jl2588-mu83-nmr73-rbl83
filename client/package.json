@@ -4,6 +4,7 @@
   "private": true,
   "proxy": "http://localhost:5000",
   "dependencies": {
+    "@craco/craco": "^6.1.1",
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
@@ -13,12 +14,12 @@
     "web-vitals": "^1.1.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "craco start",
     "copy-build": "copyfiles -u 1 \"build/*\" \"../app/static/\"",
     "copy-static-files": "copyfiles -u 1 \"build/**/*\" \"../app/\"",
     "copy-index-template": "copyfiles -u 1 \"build/index.html\" \"../app/templates/\"",
-    "build": "react-scripts build && npm run copy-build && npm run copy-static-files && npm run copy-index-template",
-    "test": "react-scripts test",
+    "build": "craco build && npm run copy-build && npm run copy-static-files && npm run copy-index-template",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -38,5 +39,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss7-compat": "^2.1.0",
+    "autoprefixer": "^9.8.6",
+    "postcss": "^7.0.35",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.0"
   }
 }
