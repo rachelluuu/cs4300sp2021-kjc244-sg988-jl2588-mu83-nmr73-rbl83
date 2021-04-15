@@ -6,6 +6,15 @@ import requests
 project_name = "Playground"
 net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu: rbl83\nVladia Trinh: vt95"
 
+@irsystem.route('/test')
+def testroute():
+  return irsystem.send_static_file('index.html')
+
+@irsystem.route('/testjson')
+def testjson():
+  my_dictionary = {'name': 'test1'}
+  return my_dictionary
+
 @irsystem.route('/', methods=['GET'])
 def search():
 	origin = request.args.get('origin')
