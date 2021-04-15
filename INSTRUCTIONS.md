@@ -1,0 +1,3 @@
+The React project lives in `client/`. When developing the frontend, follow the instructions in the `README.md` in the client folder.
+
+You have to run `npm run build` in `client/` for the files the Flask app serves to update. I modified the command so that after the the build folder is generated, the files are copied to `app/static` and `app/template`. There's probably a better solution than this, but I spent a while searching, and the solutions on the internet weren't working. In other words, when you run the Flask app, it doesn't have live reload for the frontend. You have to build the project to see `localhost:5000/` update. 
