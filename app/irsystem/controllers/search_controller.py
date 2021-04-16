@@ -29,6 +29,54 @@ def songs_at_loc(loc1, loc2):
     songsall.append(s['result'])
   return songsall
 
+def get_lyrics(track, artist):
+    track = track.replace(" ", "%20")
+    artist = artist.replace(" ", "%20")
+    authorization_code = "c26318b7fe659daaf8b468523a4196e7"
+    link = "https://api.musixmatch.com/ws/1.1/matcher.lyrics.get?format=json&callback=callback&q_track="+track+"&q_artist="+artist+"&apikey="+authorization_code
+    response = requests.get(link)
+    try:
+        return response.json()['message']['body']['lyrics']['lyrics_body'].split("...")[0]
+    except:
+        return None
+
+def naive_tokenizer(str_in):
+    str_in = str_in.lower()
+    for token in ['\n', '-', '-', "–", '!', '.', ',', '(', ')']:
+        str_in = str_in.replace(token, " ")
+    return str_in.split()
+
+def string_to_dict(str_in, tokenizer=naive_tokenizer):
+    if str_in is None:
+        return dict()
+    ans = dict()
+    i = -1
+    for i, word in enumerate(tokenizer(str_in)):
+        if word not in ans:
+            ans[word] = 0
+        ans[word] += 1
+    ans["Total Words"] = i + 1
+    return ans
+
+def sim_score(user_input, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
+    # lyrics is a string of the song, the untokenized outpyt from get_lyrics
+    # userinput is whatever unprocessed string the user sent us
+    
+    # TODO: Some things I would eventually like to do:
+    # 1. Use word embeddings to calculate similarities instead of strings
+    # 2. Use nltk to strip stopwords (modified for songs; e.x. ooh, oh, yeah, yuh, ah, mm, hmm, hey)
+    if user_dict is None:
+        user_dict = string_to_dict(user_input)
+    if lyrics_dict is None:
+        lyrics_dict = string_to_dict(lyrics)
+    if user_dict["Total Words"] == 0 or lyrics_dict["Total Words"] == 0:
+        return 0
+    sim = -1 * user_dict["Total Words"] * lyrics_dict["Total Words"]
+    for word in user_dict:
+        if word in lyrics_dict:
+            sim += user_dict[word] * lyrics_dict[word]
+    return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
+
 # the search route that takes in origin, destination, and vibe and outputs a playlist
 @irsystem.route('/search')
 def search():
