@@ -78,13 +78,13 @@ def sim_score(user_input, lyrics, user_dict=None, lyrics_dict=None, tokenizer=na
             sim += user_dict[word] * lyrics_dict[word]
     return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
 
-# returns a ranked playlist of songs given a origin, destination, and vibe 
+# returns a ranked playlist of song titles and artists given a origin, destination, and vibe 
 def get_playlist(origin, destination, vibe):
   songs_by_location = songs_at_loc(origin,destination)
   print(songs_by_location)
   song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
   song_scores = sorted([(song, sim_score(vibe, lyric)) for (song,lyric) in song_lyrics], key=lambda x:x[1])
-  return [song for (song,_) in song_scores]
+  return [(song["title"], song["primary_artist"]["name"]) for (song,_) in song_scores]
   
 # the search route that takes in origin, destination, and vibe and outputs a playlist
 @irsystem.route('/search')
