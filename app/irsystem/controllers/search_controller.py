@@ -83,8 +83,8 @@ def get_playlist(origin, destination, vibe):
   songs_by_location = songs_at_loc(origin,destination)
   print(songs_by_location)
   song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
-  song_scores = sorted([(song, sim_score(vibe, lyric)) for (song,lyric) in song_lyrics], key=lambda x:x[1])
-  return [(song["title"], song["primary_artist"]["name"]) for (song,_) in song_scores]
+  song_scores = sorted([(song["title"], song["primary_artist"],["name"], sim_score(vibe, lyric)) for (song,lyric) in song_lyrics], key=lambda x:-x[1])
+  return song_scores
   
 # the search route that takes in origin, destination, and vibe and outputs a playlist
 @irsystem.route('/search')
