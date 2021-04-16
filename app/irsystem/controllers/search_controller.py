@@ -59,7 +59,7 @@ def string_to_dict(str_in, tokenizer=naive_tokenizer):
     ans["Total Words"] = i + 1
     return ans
 
-def sim_score(user_input, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
+def sim_score(keywords, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
     # lyrics is a string of the song, the untokenized outpyt from get_lyrics
     # userinput is whatever unprocessed string the user sent us
     
@@ -67,7 +67,7 @@ def sim_score(user_input, lyrics, user_dict=None, lyrics_dict=None, tokenizer=na
     # 1. Use word embeddings to calculate similarities instead of strings
     # 2. Use nltk to strip stopwords (modified for songs; e.x. ooh, oh, yeah, yuh, ah, mm, hmm, hey)
     if user_dict is None:
-        user_dict = string_to_dict(user_input)
+        user_dict = string_to_dict(keywords)
     if lyrics_dict is None:
         lyrics_dict = string_to_dict(lyrics)
     if user_dict["Total Words"] == 0 or lyrics_dict["Total Words"] == 0:
@@ -79,10 +79,10 @@ def sim_score(user_input, lyrics, user_dict=None, lyrics_dict=None, tokenizer=na
     return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
 
 # returns a ranked playlist of song titles and artists given a origin, destination, and vibe 
-def get_playlist(origin, destination, vibe):
+def get_playlist(origin, destination, vibe, keywords):
   songs_by_location = songs_at_loc(origin,destination)
   song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
-  song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(vibe, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
+  song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
   return song_scores
   
 # the search route that takes in origin, destination, and vibe and outputs a playlist
@@ -92,8 +92,9 @@ def search():
 	origin = request.args.get('origin')
 	destination = request.args.get('destination')
 	vibe = request.args.get('vibe')
+	keywords = request.args.get('keywords')
 
-	if not origin or not destination or not vibe:
+	if not origin or not destination:
 		error_msg = 'Make sure to put in an orgin, destination, and vibe'
 
 	playlist = get_playlist(origin, destination, vibe)
