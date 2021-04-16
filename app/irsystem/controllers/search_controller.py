@@ -2,6 +2,7 @@ from . import *
 from app.irsystem.models.helpers import *
 from app.irsystem.models.helpers import NumpyEncoder as NumpyEncoder
 import requests
+import json
 
 project_name = "Playground"
 net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu: rbl83\nVladia Trinh: vt95"
@@ -77,18 +78,25 @@ def sim_score(user_input, lyrics, user_dict=None, lyrics_dict=None, tokenizer=na
             sim += user_dict[word] * lyrics_dict[word]
     return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
 
+# returns a ranked playlist of songs given a origin, destination, and vibe 
+def get_playlist(origin, destination, vibe):
+  songs_by_location = songs_at_loc(origin,destination)
+  print(songs_by_location)
+  song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
+  song_scores = sorted([(song, sim_score(vibe, lyric)) for (song,lyric) in song_lyrics], key=lambda x:x[1])
+  return [song for (song,_) in song_scores]
+  
 # the search route that takes in origin, destination, and vibe and outputs a playlist
 @irsystem.route('/search')
 def search():
 	error_msg = ""
 	origin = request.args.get('origin')
-	dest = request.args.get('destination')
+	destination = request.args.get('destination')
 	vibe = request.args.get('vibe')
 
-	if not origin or not dest:
-		error_msg = 'Make sure to put in an orgin and destination'
+	if not origin or not destination or not vibe:
+		error_msg = 'Make sure to put in an orgin, destination, and vibe'
 
-	songs = songs_at_loc(origin,dest)
+	playlist = get_playlist(origin, destination, vibe)
   
-	my_dictionary = {'error': error_msg}
-	return my_dictionary
+	return {'error': error_msg, 'playlist': playlist}
