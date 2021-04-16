@@ -48,7 +48,7 @@ def naive_tokenizer(str_in):
 
 def string_to_dict(str_in, tokenizer=naive_tokenizer):
     if str_in is None:
-        return dict()
+        return {"Total Words":0}
     ans = dict()
     i = -1
     for i, word in enumerate(tokenizer(str_in)):
