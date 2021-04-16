@@ -59,7 +59,7 @@ def string_to_dict(str_in, tokenizer=naive_tokenizer):
     ans["Total Words"] = i + 1
     return ans
 
-def sim_score(keywords, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
+def sim_score(vibe, keywords, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
     # lyrics is a string of the song, the untokenized outpyt from get_lyrics
     # userinput is whatever unprocessed string the user sent us
     
@@ -95,8 +95,8 @@ def search():
 	keywords = request.args.get('keywords')
 
 	if not origin or not destination:
-		error_msg = 'Make sure to put in an orgin, destination, and vibe'
+		error_msg = 'Make sure to put in an orgin and destination'
 
-	playlist = get_playlist(origin, destination, vibe)
+	playlist = get_playlist(origin, destination, vibe, keywords)
   
 	return {'error': error_msg, 'playlist': playlist}
