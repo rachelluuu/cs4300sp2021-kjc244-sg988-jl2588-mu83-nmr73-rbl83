@@ -6,16 +6,9 @@ import requests
 project_name = "Playground"
 net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu: rbl83\nVladia Trinh: vt95"
 
-
-@irsystem.route('/testjson')
-def testjson():
-  my_dictionary = {'name': 'test1'}
-  return my_dictionary
-
 @irsystem.route('/', methods=['GET'])
-def search():
+def render():
   return render_template('index.html')
-
 
 #returns list of first 100 songs from genius api for each location
 def songs_at_loc(loc1, loc2):
@@ -36,3 +29,18 @@ def songs_at_loc(loc1, loc2):
     songsall.append(s['result'])
   return songsall
 
+# the search route that takes in origin, destination, and vibe and outputs a playlist
+@irsystem.route('/search')
+def search():
+	error_msg = ""
+	origin = request.args.get('origin')
+	dest = request.args.get('destination')
+	vibe = request.args.get('vibe')
+
+	if not origin or not dest:
+		error_msg = 'Make sure to put in an orgin and destination'
+
+	songs = songs_at_loc(origin,dest)
+  
+	my_dictionary = {'error': error_msg}
+	return my_dictionary
