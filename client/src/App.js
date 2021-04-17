@@ -1,26 +1,10 @@
 import InputForm from './components/InputForm';
 import Results from './components/Results';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 function App() {
-  const [testJsonData, setTestJsonData] = useState('test0');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    fetch('/testjson').then(res => res.json()).then(data => {
-      // /testjson response format
-      //{
-      //  "name": "test1"
-      //}
-      setTestJsonData(data.name)
-    });
-  }, []);
-
-  function handleClick(e) {
-    e.preventDefault();
-    setLoading(true);
-  }
-
+  const [results, setResults] = useState([['Song Name', 'artist', 0], ['Song2', 'artist2', 1]]);
+  const [error, setError] = useState('');
 
   return (
     <div className="App">
@@ -30,10 +14,16 @@ function App() {
             🚦 traffic jams
         </h1>
         </div>
-        <InputForm handleClick={handleClick} />
+        <InputForm
+          setResults={setResults}
+          setError={setError}
+        />
       </div>
       <div className="bg-blueGray-100 -mt-5 lg:px-40 py-20">
-        <Results loading={loading} />
+        <Results
+          error={error}
+          results={results}
+        />
       </div>
     </div>
   );
