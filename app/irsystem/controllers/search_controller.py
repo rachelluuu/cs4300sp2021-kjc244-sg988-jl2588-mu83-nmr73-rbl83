@@ -82,7 +82,7 @@ def sim_score(vibe, keywords, lyrics, user_dict=None, lyrics_dict=None, tokenize
 def get_playlist(origin, destination, vibe, keywords):
   songs_by_location = songs_at_loc(origin,destination)
   song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
-  song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
+  song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(vibe, keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
   return song_scores
   
 # the search route that takes in origin, destination, and vibe and outputs a playlist
