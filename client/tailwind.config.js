@@ -9,10 +9,11 @@ module.exports = {
       'gray': colors.trueGray,
       'pink': colors.pink,
       'blueGray': colors.blueGray,
+      'red': colors.red
     },
     fontFamily: {
-      'sans': ["Segoe UI", 'ui-sans-serif'],
-      'customStack': ["Rubik", 'ui-sans-serif']
+      'sans': ["Source Sans Pro", "Segoe UI", "Arial", "ui-sans-serif"],
+      'customStack': ["Rubik", "ui-sans-serif"]
     },
     extend: {
       backgroundImage: theme => ({
