@@ -1,8 +1,10 @@
 import InputForm from './components/InputForm';
+import Results from './components/Results';
 import { useState, useEffect } from 'react';
 
 function App() {
   const [testJsonData, setTestJsonData] = useState('test0');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch('/testjson').then(res => res.json()).then(data => {
@@ -14,18 +16,24 @@ function App() {
     });
   }, []);
 
+  function handleClick(e) {
+    e.preventDefault();
+    setLoading(true);
+  }
+
+
   return (
     <div className="App">
-      <div class="bg-hero-custom bg-center container mx-auto lg:px-40 pt-10">
-        <div class="bg-white px-8 py-6 w-max -mt-12 rounded-md shadow-lg">
-          <h1 class="font-customStack text-4xl">
+      <div className="bg-hero-custom bg-center container mx-auto lg:px-40">
+        <div className="bg-white px-8 py-6 w-max -mt-2 rounded-md shadow-lg">
+          <h1 className="font-customStack text-4xl">
             🚦 traffic jams
         </h1>
         </div>
-        <InputForm />
+        <InputForm handleClick={handleClick} />
       </div>
-      <div className="bg-blueGray-100 pt-20">
-        ..sdfsdfsdfsdfsdfsdf
+      <div className="bg-blueGray-100 -mt-5 lg:px-40 py-20">
+        <Results loading={loading} />
       </div>
     </div>
   );
