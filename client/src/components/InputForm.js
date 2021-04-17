@@ -1,57 +1,40 @@
-import { useState, useEffect } from 'react';
-
 function InputForm() {
-  const [testJsonData, setTestJsonData] = useState('test0');
-
-  useEffect(() => {
-    fetch('/testjson').then(res => res.json()).then(data => {
-      // /testjson response format
-      //{
-      //  "name": "test1"
-      //}
-      setTestJsonData(data.name)
-    });
-  }, []);
-
   return (
-    <div className="InputForm container mx-auto px-10 pt-20">
-      <div class="mb-3 pt-0">
-        <form class="gap-4 pb-10">
-          <div class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 pb-10">
+    <div className="InputForm container mx-auto lg:px-10 lg:pt-20 relative top-10 ">
+      <div class="mb-3 bg-gray-50 py-3 rounded-md shadow-lg">
+        <form class="px-10 py-10">
+          <div class="grid gap-4 grid-cols-2">
             <div>
-              <h5 class="text-xl text-center font-semibold mt-2 mb-2 text-indigo-800">
+              <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded text-blueGray-600 bg-blueGray-200 uppercase last:mr-0 mr-1 mb-2">
                 Start Location
-              </h5>
+              </span>
+              <input type="text" placeholder="New York" class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white rounded text-sm shadow focus:outline-none focus:ring w-full" />
             </div>
-            <div class="col-span-2">
-              <input type="text" placeholder="New York" class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-none focus:outline-none focus:ring w-full" />
-            </div>
-          </div>
-          <div class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 pb-10">
             <div>
-              <h5 class="text-xl text-center font-semibold mt-2 mb-2 text-indigo-800">
+              <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded text-blueGray-600 bg-blueGray-200 uppercase last:mr-0 mr-1 mb-2">
                 End Location
-              </h5>
-            </div>
-            <div class="col-span-2">
-              <input type="text" placeholder="Ithaca" class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-none focus:outline-none focus:ring w-full" />
+              </span>
+              <input type="text" placeholder="Ithaca" class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white rounded text-sm shadow focus:outline-none focus:ring w-full" />
             </div>
           </div>
-          <div class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1">
+          <div class="grid gap-4 grid-cols-2 mt-10">
             <div>
-              <h5 class="text-xl text-center font-semibold mt-2 mb-2 text-indigo-800">
-                Options
-              </h5>
+              <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded text-blueGray-600 bg-blueGray-200 uppercase last:mr-0 mr-1 mb-2">
+                Vibe
+              </span>
+              <input type="text" placeholder="Groovy" class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white rounded text-sm shadow focus:outline-none focus:ring w-full" />
             </div>
-            <div class="col-span-2">
-              <input type="text" placeholder="Genre" class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded text-sm border-0 shadow outline-none focus:outline-none focus:ring w-full" />
+            <div>
+              <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded text-blueGray-600 bg-blueGray-200 uppercase last:mr-0 mr-1 mb-2">
+                Keywords
+              </span>
+              <input type="text" placeholder="School, Class, ..." class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white rounded text-sm shadow focus:outline-none focus:ring w-full" />
             </div>
           </div>
-          <button class="bg-pink-500 text-white active:bg-pink-600 font-bold uppercase text-base px-8 py-3 rounded shadow-md hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 ml-10 mt-10" type="button">
-            Submit
+          <button class="bg-pink-500 text-white active:bg-pink-600 font-bold uppercase text-base px-8 py-3 rounded shadow-md hover:shadow-lg outline-none focus:outline-none ease-linear transition-all duration-150 mt-10" type="button">
+            Fetch Results
           </button>
         </form>
-        <p>random test stuff: {testJsonData}</p>
       </div>
 
     </div>
