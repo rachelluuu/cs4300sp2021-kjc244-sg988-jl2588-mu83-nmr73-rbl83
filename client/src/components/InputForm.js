@@ -11,18 +11,17 @@ function InputForm(props) {
   function handleClick(e) {
     e.preventDefault();
     setLoading(true);
-    fetch('http://localhost:5000/search', {
+    fetch('/search?' + new URLSearchParams({
       'origin': origin,
       'destination': destination,
       'vibe': vibe,
       'keywords': keywords
-    }).then(res => console.log(res));
-    /*.then(res => res.json()).then(data => {
+    })).then(res => res.json()).then(data => {
       console.log(data)
       props.setError(data.error)
       props.setResults(data.playlist)
       setLoading(false)
-    });*/
+    });
   }
 
   return (
