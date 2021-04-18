@@ -17,7 +17,7 @@ def songs_at_loc(loc1, loc2):
   loc2 = loc2.replace(" ", "%20")
   songs1 = []
   songs2 = []
-  for i in range(1, 11):
+  for i in range(1, 6):
     response1 = requests.get("https://api.genius.com/search?q=" + loc1 + "&page=" + str(i) + "&access_token=9NTODlkpDaz4ehLNvb14u5Jv7asQuGjyvzZD4X5O8VC5kxtwh2vbkz0uuOmviuC_")
     songs1 += response1.json()['response']['hits']
     response2 = requests.get("https://api.genius.com/search?q=" + loc2 + "&page=" + str(i) + "&access_token=9NTODlkpDaz4ehLNvb14u5Jv7asQuGjyvzZD4X5O8VC5kxtwh2vbkz0uuOmviuC_")
