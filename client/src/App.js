@@ -1,5 +1,6 @@
 import InputForm from './components/InputForm';
 import Results from './components/Results';
+import Footer from './components/Footer';
 import { useState } from 'react';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           results={results}
         />
       </div>
+      <Footer />
     </div>
   );
 }
