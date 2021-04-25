@@ -35,7 +35,7 @@ function Multiselect(props) {
     props.setGenres(newGenres);
   }
 
-  const displaySearchResults = searchResults.slice(0, 6).map((result, index) =>
+  const displaySearchResults = searchResults.map((result, index) =>
     <div className="cursor-pointer py-3 px-2 shadow-sm" onClick={() => onClickResult(result)} key={index}>{result}</div>
   );
 
@@ -46,12 +46,20 @@ function Multiselect(props) {
     </span>
   );
 
-  return (
-    <div>
-      <InputGroup label="Genres" placeholder="Pop" value={curSearch} setVal={onSearchChange} />
-      <div className="bg-white text-blueGray-600 rounded text-sm shadow">
+  function EmptyOrResults() {
+    if (searchResults.length > 0) {
+      return <div className="bg-white text-blueGray-600 rounded text-sm shadow h-36 overflow-auto">
         {displaySearchResults}
       </div>
+    } else {
+      return null;
+    }
+  }
+
+  return (
+    <div>
+      <InputGroup label="Genres" placeholder="Dance" value={curSearch} setVal={onSearchChange} />
+      <EmptyOrResults />
       <div className="mt-2">
         {selectedGenres}
       </div>
