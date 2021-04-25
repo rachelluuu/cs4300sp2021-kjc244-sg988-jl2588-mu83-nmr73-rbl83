@@ -1,11 +1,12 @@
 import InputGroup from './InputGroup';
+import Multiselect from './Multiselect';
 import { useState } from 'react';
 
 function InputForm(props) {
   const [loading, setLoading] = useState(false);
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-  const [vibe, setVibe] = useState('');
+  const [genres, setGenres] = useState([]);
   const [keywords, setKeywords] = useState('');
 
   function handleClick(e) {
@@ -14,7 +15,7 @@ function InputForm(props) {
     fetch('/search?' + new URLSearchParams({
       'origin': origin,
       'destination': destination,
-      'vibe': vibe,
+      'genres': genres,
       'keywords': keywords
     })).then(res => res.json()).then(data => {
       console.log(data)
@@ -48,7 +49,7 @@ function InputForm(props) {
             <InputGroup label="Destination" placeholder="Ithaca" value={destination} setVal={setDestination} />
           </div>
           <div className="grid gap-4 grid-cols-2 mt-10">
-            <InputGroup label="Vibe" placeholder="Groovy" value={vibe} setVal={setVibe} />
+            <Multiselect genres={genres} setGenres={setGenres} />
             <InputGroup label="Keywords" placeholder="School, class..." value={keywords} setVal={setKeywords} />
           </div>
           <SubmitButton />
