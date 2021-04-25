@@ -30,11 +30,12 @@ def songs_at_loc(loc1, loc2):
         songsall.append(s['result'])
     return songsall
 
+# Returns of list of genre similarity scores given a list of genres that the user wants
 def get_genre_similarity(genre_list):
     with open("genreSVD/genres_compressed.npy", 'rb') as f:
         genres_compressed = np.load(f)
     with open("genreSVD/genre_to_idx.json") as json_file:
-        genre_to_idx = json.load("genreSVD/genres_compressed.npy")
+        genre_to_idx = json.load(json_file)
     scores = np.asarray([genres_compressed.dot(genres_compressed[genre_to_idx[genre],:]) for genre in genre_list])
     return np.max(scores, axis=0).tolist()
 
@@ -86,7 +87,7 @@ def sim_score(genre_scores, keywords, lyrics, user_dict=None, lyrics_dict=None, 
             sim += user_dict[word] * lyrics_dict[word]
     return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
 
-# returns a ranked playlist of song titles and artists given a origin, destination, and genres 
+# returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
 def get_playlist(origin, destination, genres, keywords):
   songs_by_location = songs_at_loc(origin,destination)
   song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
@@ -94,13 +95,13 @@ def get_playlist(origin, destination, genres, keywords):
   song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(genre_scores, keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
   return song_scores
   
-# the search route that takes in origin, destination, and genres and outputs a playlist
+# the search route that takes in origin, destination, genres and keywords, and outputs a playlist
 @irsystem.route('/search')
 def search():
 	error_msg = ""
 	origin = request.args.get('origin')
 	destination = request.args.get('destination')
-	genres = request.args.get('genres')
+	genres = request.args.get('genres').split(",")
 	keywords = request.args.get('keywords')
 
 	if not origin or not destination:
