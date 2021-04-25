@@ -3,6 +3,7 @@ from app.irsystem.models.helpers import *
 from app.irsystem.models.helpers import NumpyEncoder as NumpyEncoder
 import requests
 import json
+import numpy as np
 
 project_name = "Playground"
 net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu: rbl83\nVladia Trinh: vt95"
@@ -28,6 +29,14 @@ def songs_at_loc(loc1, loc2):
     for s in songs2:
         songsall.append(s['result'])
     return songsall
+
+def get_genre_similarity(genre_list):
+    with open("genreSVD/genres_compressed.npy", 'rb') as f:
+        genres_compressed = np.load(f)
+    with open("genreSVD/genre_to_idx.json") as json_file:
+        genre_to_idx = json.load("genreSVD/genres_compressed.npy")
+    scores = np.asarray([genres_compressed.dot(genres_compressed[genre_to_idx[genre],:]) for genre in genre_list])
+    return np.max(scores, axis=0).tolist()
 
 def get_lyrics(track, artist):
     track = track.replace(" ", "%20")
@@ -58,7 +67,7 @@ def string_to_dict(str_in, tokenizer=naive_tokenizer):
     ans["Total Words"] = i + 1
     return ans
 
-def sim_score(vibe, keywords, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
+def sim_score(genre_scores, keywords, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
     # lyrics is a string of the song, the untokenized outpyt from get_lyrics
     # userinput is whatever unprocessed string the user sent us
     
@@ -77,25 +86,26 @@ def sim_score(vibe, keywords, lyrics, user_dict=None, lyrics_dict=None, tokenize
             sim += user_dict[word] * lyrics_dict[word]
     return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
 
-# returns a ranked playlist of song titles and artists given a origin, destination, and vibe 
-def get_playlist(origin, destination, vibe, keywords):
+# returns a ranked playlist of song titles and artists given a origin, destination, and genres 
+def get_playlist(origin, destination, genres, keywords):
   songs_by_location = songs_at_loc(origin,destination)
   song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
-  song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(vibe, keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
+  genre_scores = get_genre_similarity(genres)
+  song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(genre_scores, keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
   return song_scores
   
-# the search route that takes in origin, destination, and vibe and outputs a playlist
+# the search route that takes in origin, destination, and genres and outputs a playlist
 @irsystem.route('/search')
 def search():
 	error_msg = ""
 	origin = request.args.get('origin')
 	destination = request.args.get('destination')
-	vibe = request.args.get('vibe')
+	genres = request.args.get('genres')
 	keywords = request.args.get('keywords')
 
 	if not origin or not destination:
 		error_msg = 'Make sure to put in an orgin and destination'
 
-	playlist = get_playlist(origin, destination, vibe, keywords)
+	playlist = get_playlist(origin, destination, genres, keywords)
   
 	return {'error': error_msg, 'playlist': playlist}
