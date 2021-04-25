@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import InputGroup from './InputGroup';
+import genres from './genres.json';
 
 function Multiselect(props) {
   // a multiselect component used for selecting multiple genres
@@ -8,7 +9,7 @@ function Multiselect(props) {
   const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
-    setOptions(['Pop', 'Party', 'American']);
+    setOptions(genres.genres);
   }, []);
 
   function onSearchChange(val) {
@@ -23,8 +24,8 @@ function Multiselect(props) {
     setCurSearch('');
     if (!props.genres.includes(val)) {
       props.setGenres([...props.genres, val]);
-      setSearchResults([]);
     }
+    setSearchResults([]);
   }
 
   function onRemoveGenre(val) {
@@ -34,8 +35,8 @@ function Multiselect(props) {
     props.setGenres(newGenres);
   }
 
-  const displaySearchResults = searchResults.map((result, index) =>
-    <div className="cursor-pointer py-3 px-2" onClick={() => onClickResult(result)} key={index}>{result}</div>
+  const displaySearchResults = searchResults.slice(0, 6).map((result, index) =>
+    <div className="cursor-pointer py-3 px-2 shadow-sm" onClick={() => onClickResult(result)} key={index}>{result}</div>
   );
 
   const selectedGenres = props.genres.map((genre, index) =>

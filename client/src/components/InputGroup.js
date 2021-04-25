@@ -10,7 +10,7 @@ function InputGroup(props) {
         {props.label}
       </span>
       <input type="text" value={props.value} onChange={handleChange}
-        placeholder={props.placeholder} className="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white bg-white rounded text-sm shadow focus:outline-none focus:ring w-full" />
+        placeholder={props.placeholder} className="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full" />
     </div>
 
   );
