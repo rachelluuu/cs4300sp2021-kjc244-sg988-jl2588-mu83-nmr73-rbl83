@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import InputGroup from './InputGroup';
+import SearchDropdownResults from './SearchDropdownResults';
 import genres from './genres.json';
 
 function Multiselect(props) {
@@ -35,10 +36,6 @@ function Multiselect(props) {
     props.setGenres(newGenres);
   }
 
-  const displaySearchResults = searchResults.map((result, index) =>
-    <div className="cursor-pointer py-3 px-2 shadow-sm" onClick={() => onClickResult(result)} key={index}>{result}</div>
-  );
-
   const selectedGenres = props.genres.map((genre, index) =>
     <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded text-white bg-blueGray-500 uppercase last:mr-0 mr-1 mb-2" key={index}>
       {genre}
@@ -46,20 +43,10 @@ function Multiselect(props) {
     </span>
   );
 
-  function EmptyOrResults() {
-    if (searchResults.length > 0) {
-      return <div className="bg-white text-blueGray-600 rounded text-sm shadow h-36 overflow-auto">
-        {displaySearchResults}
-      </div>
-    } else {
-      return null;
-    }
-  }
-
   return (
     <div>
       <InputGroup label="Genres" placeholder="Dance" value={curSearch} setVal={onSearchChange} />
-      <EmptyOrResults />
+      <SearchDropdownResults searchResults={searchResults} onClickResult={onClickResult} />
       <div className="mt-2">
         {selectedGenres}
       </div>
