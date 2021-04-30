@@ -59,7 +59,7 @@ def sim_score2(genre_scores, keywords, lyrics, popularity, song_genres):
             if syn in song_dict:
               pass
               sim += .2 * key_dict[word] * song_dict[syn]
-    sim = np.log(sim) - np.log(key_dict["Total Words"] * song_dict["Total Words"])
+    sim = np.log(sim+.1) - np.log(key_dict["Total Words"] * song_dict["Total Words"])
     sim += np.log(popularity + 1)
     if len(song_genres) > 0:
       total_genre_score = sum([genre_scores[genre] for genre in song_genres if genre in genre_scores])
