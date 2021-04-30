@@ -164,7 +164,7 @@ def get_playlist(origin, destination, genres, keywords):
   return song_scores
   
 # the search route that takes in origin, destination, genres and keywords, and outputs a playlist
-# @irsystem.route('/search')
+@irsystem.route('/search')
 def search():
 	error_msg = ""
 	origin = request.args.get('origin')
