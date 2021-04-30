@@ -57,11 +57,13 @@ def sim_score2(genre_scores, keywords, lyrics, popularity, song_genres):
             if syn in song_dict:
               pass
               sim += .2 * key_dict[word] * song_dict[syn]
-    sim /= (key_dict["Total Words"] * song_dict["Total Words"])
-    sim *= popularity
+    sim = np.log(sim) - np.log(key_dict["Total Words"] * song_dict["Total Words"])
+    sim += np.log(popularity)
     if len(song_genres) > 0:
       total_genre_score = sum([genre_scores[genre] for genre in song_genres if genre in genre_scores])
-      sim *= total_genre_score
+      if total_genre_score == 0:
+      	total_genre_score = .1
+      sim += np.log(total_genre_score)
     return sim
 
 # Returns of list of genre similarity scores given a list of genres that the user wants
@@ -160,7 +162,7 @@ def get_playlist(origin, destination, genres, keywords):
   return song_scores
   
 # the search route that takes in origin, destination, genres and keywords, and outputs a playlist
-@irsystem.route('/search')
+# @irsystem.route('/search')
 def search():
 	error_msg = ""
 	origin = request.args.get('origin')
