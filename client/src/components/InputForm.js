@@ -51,7 +51,7 @@ function InputForm(props) {
           <h2 className="text-2xl text-blueGray-600 pb-5">Generate the perfect playlist for your roadtrip.</h2>
           <div className="grid gap-4 grid-cols-2">
             <InputCity label="Origin" placeholder="New York" value={origin} setVal={setOrigin} />
-            <InputCity label="Destination" placeholder="Ithaca" value={destination} setVal={setDestination} />
+            <InputCity label="Destination" placeholder="Chicago" value={destination} setVal={setDestination} />
           </div>
           <div className="grid gap-4 grid-cols-2 mt-10">
             <Multiselect genres={genres} setGenres={setGenres} />
