@@ -9,7 +9,7 @@ import os
 project_name = "Playground"
 net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu: rbl83\nVladia Trinh: vt95"
 
-@irsystem.route('/', methods=['GET'])
+# @irsystem.route('/', methods=['GET'])
 def render():
   return render_template('index.html')
 
