@@ -12,22 +12,26 @@ function InputForm(props) {
 
   function handleClick(e) {
     e.preventDefault();
-    setLoading(true);
-    fetch('/search?' + new URLSearchParams({
-      'origin': origin,
-      'destination': destination,
-      'genres': genres,
-      'keywords': keywords
-    })).then(res => res.json()).then(data => {
-      console.log(data);
-      props.setError(data.error);
-      props.setResults(data.playlist);
-      setLoading(false);
-    }).catch((error) => {
-      console.log(error);
-      props.setError("Error. Check your network connection or inputs.");
-      setLoading(false);
-    });
+    if (props.cities.includes(origin) && props.cities.includes(destination)) {
+      setLoading(true);
+      fetch('/search?' + new URLSearchParams({
+        'origin': origin,
+        'destination': destination,
+        'genres': genres,
+        'keywords': keywords
+      })).then(res => res.json()).then(data => {
+        console.log(data);
+        props.setError(data.error);
+        props.setResults(data.playlist);
+        setLoading(false);
+      }).catch((error) => {
+        console.log(error);
+        props.setError("Error: Check your network connection or inputs.");
+        setLoading(false);
+      });
+    } else {
+      props.setError("Error: Make sure you clicked on cities in the dropdown.");
+    }
   }
 
   function SubmitButton() {
@@ -48,14 +52,16 @@ function InputForm(props) {
     <div className="InputForm container mx-auto lg:px-10 lg:pt-20 relative top-5 ">
       <div className="mb-3 bg-gray-50 rounded-md shadow-lg">
         <form className="px-10 py-10">
-          <h2 className="text-2xl text-blueGray-600 pb-5">Generate the perfect playlist for your roadtrip.</h2>
-          <div className="grid gap-4 grid-cols-2">
-            <InputCity label="Origin" placeholder="New York" value={origin} setVal={setOrigin} />
-            <InputCity label="Destination" placeholder="Ithaca" value={destination} setVal={setDestination} />
+          <div className="grid gap-4 grid-cols-">
+            <InputGroup label="Input" placeholder="School, class, books, study..." value={keywords} setVal={setKeywords} header={"Input any words to shape the theme of your playlist."} />
           </div>
-          <div className="grid gap-4 grid-cols-2 mt-10">
+          <p className="text-blueGray-500 pb-5 mt-5">Where are you going? Please make sure you click on cities and genres from the dropdowns with your mouse.</p>
+          <div className="grid gap-4 grid-cols-2">
+            <InputCity options={props.cities} label="Origin" placeholder="New York" value={origin} setVal={setOrigin} />
+            <InputCity options={props.cities} label="Destination" placeholder="Chicago" value={destination} setVal={setDestination} />
+          </div>
+          <div className="grid gap-4 grid-cols-1 mt-5">
             <Multiselect genres={genres} setGenres={setGenres} />
-            <InputGroup label="Keywords" placeholder="School, class..." value={keywords} setVal={setKeywords} />
           </div>
           <SubmitButton />
         </form>
