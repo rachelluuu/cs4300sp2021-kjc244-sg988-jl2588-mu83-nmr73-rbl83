@@ -14,22 +14,21 @@ def render():
   return render_template('index.html')
 
 def songs_at_loc(loc1, loc2):
-    #loc1 = loc1.replace(" ", "%20")
-    #loc2 = loc2.replace(" ", "%20")
     songs1 = []
     songs2 = []
-    #for i in range(1, 4):
-    #    response1 = requests.get("https://genius.com/api/search/lyrics?q=" + loc1 + "&page=" + str(i))
-    #    songs1 += response1.json()['response']['sections'][0]['hits']
-    #    response2 = requests.get("https://genius.com/api/search/lyrics?q=" + loc2 + "&page=" + str(i))
-    #    songs2 += response2.json()['response']['sections'][0]['hits']
-    #filename = os.path.join(irsystem.static_folder, 'top_100_cities.json')
     with open('top_100_cities.json') as cities_file:
         data = json.load(cities_file)
         songs1 = data[loc1.lower()]
         songs2 = data[loc2.lower()]
     songsall = songs1+songs2
     return songsall
+
+def songs_at_oneloc(loc1):
+    songs1 = []
+    with open('top_100_cities.json') as cities_file:
+        data = json.load(cities_file)
+        songs1 = data[loc1.lower()]
+    return songs1
 
 def get_syn(word): #necessary new helper function
   synonyms = set()
@@ -113,26 +112,30 @@ def string_to_dict(str_in, tokenizer=get_toks): #necessary updated helper functi
     ans["Total Words"] = i + 1 - stopword_count
     return ans
 
-
-# returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
-def get_playlist(origin, destination, genres, keywords):
-  songs_by_location = songs_at_loc(origin,destination)
-  song_lyrics = []
-  with open('song_and_artist_to_lyrics.json') as lyrics_file:
+def get_similarity_list(songs_by_location, genres, keywords, seen_songs=set()):
+    song_lyrics = []
+    if len(seen_songs) > 0:
+        purge_duplicates = []
+        for song in songs_by_location:
+            title = song["title"]
+            if title not in seen_songs:
+                purge_duplicates.append(song)
+        songs_by_location = purge_duplicates
+    with open('song_and_artist_to_lyrics.json') as lyrics_file:
         lyrics_map = json.load(lyrics_file)
         for song in songs_by_location:
             title = song["title"]
+            seen_songs.add(title)
             artist = song["primary_artist"]["name"]
             key = title + " - " + artist
             if key in lyrics_map:
                 song_lyrics.append((song, lyrics_map[key]))
             else:
                 song_lyrics.append((song, None))
-  #song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
-  song_genres = []
-  with open('song_genres.json') as genres_file:
-      genres_map = json.load(genres_file)
-      for song in songs_by_location:
+    song_genres = []
+    with open('song_genres.json') as genres_file:
+        genres_map = json.load(genres_file)
+        for song in songs_by_location:
             title = song["title"]
             artist = song["primary_artist"]["name"]
             key = title + " - " + artist
@@ -140,16 +143,23 @@ def get_playlist(origin, destination, genres, keywords):
                 song_genres.append(genres_map[key])
             else:
                 song_genres.append([])
-  genre_scores = get_genre_similarity(genres)
-  song_scores = []
-  for index, (song_info, lyric) in enumerate(song_lyrics):
-      popularity = song_info["pyongs_count"]
-      genres = song_genres[index]
-      similarity = sim_score2(genre_scores, keywords, lyric, popularity, genres)
-      song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity))
-  #song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(genre_scores, keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
-  song_scores = sorted(song_scores, key=lambda x: x[2], reverse=True)
-  return song_scores
+    genre_scores = get_genre_similarity(genres)
+    song_scores = []
+    for index, (song_info, lyric) in enumerate(song_lyrics):
+        popularity = song_info["pyongs_count"]
+        genres = song_genres[index]
+        similarity = sim_score2(genre_scores, keywords, lyric, popularity, genres)
+        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity))
+    return sorted(song_scores, key=lambda x: x[2], reverse=True)
+
+# returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
+def get_playlist(origin, destination, genres, keywords):
+  origin_songs = songs_at_oneloc(origin)
+  dest_songs = songs_at_oneloc(destination)
+  seen_songs = set()
+  origin_sim = get_similarity_list(origin_songs, genres, keywords, seen_songs)[:50]
+  dest_sim = get_similarity_list(dest_songs, genres, keywords, seen_songs)[:50]
+  return origin_sim+dest_sim
   
 # the search route that takes in origin, destination, genres and keywords, and outputs a playlist
 @irsystem.route('/search')
