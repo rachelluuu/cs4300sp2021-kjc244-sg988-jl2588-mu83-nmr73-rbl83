@@ -45,7 +45,7 @@ function Multiselect(props) {
 
   return (
     <div>
-      <InputGroup label="Genres" placeholder="Dance" value={curSearch} setVal={onSearchChange} />
+      <InputGroup label="Genres" placeholder="Dance" value={curSearch} setVal={onSearchChange} required={true} />
       <SearchDropdownResults searchResults={searchResults} onClickResult={onClickResult} />
       <div className="mt-2">
         {selectedGenres}
