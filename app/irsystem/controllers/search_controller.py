@@ -89,42 +89,30 @@ def get_lyrics(track, artist):
     except:
         return None
 
-def naive_tokenizer(str_in):
-    str_in = str_in.lower()
-    for token in ['\n', '-', '-', "–", '!', '.', ',', '(', ')']:
-        str_in = str_in.replace(token, " ")
-    return str_in.split()
+def get_toks(input): #necessary updated helper function
+    output = []
+    for toks in [list(map(str.lower, word_tokenize(sent))) for sent in sent_tokenize(input)]:
+      output += toks
+    return output
 
-def string_to_dict(str_in, tokenizer=naive_tokenizer):
+def string_to_dict(str_in, tokenizer=get_toks): #necessary updated helper function
+    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby'}
+    song_stopwords = set(stopwords.words('english')).union(riff_words)
     if str_in is None:
         return {"Total Words":0}
     ans = dict()
     i = -1
+    stopword_count = 0
     for i, word in enumerate(tokenizer(str_in)):
+        if word in song_stopwords:
+          stopword_count += 1
+          continue
         if word not in ans:
             ans[word] = 0
         ans[word] += 1
-    ans["Total Words"] = i + 1
+    ans["Total Words"] = i + 1 - stopword_count
     return ans
 
-def sim_score(genre_scores, keywords, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
-    # lyrics is a string of the song, the untokenized outpyt from get_lyrics
-    # userinput is whatever unprocessed string the user sent us
-    
-    # TODO: Some things I would eventually like to do:
-    # 1. Use word embeddings to calculate similarities instead of strings
-    # 2. Use nltk to strip stopwords (modified for songs; e.x. ooh, oh, yeah, yuh, ah, mm, hmm, hey)
-    if user_dict is None:
-        user_dict = string_to_dict(keywords)
-    if lyrics_dict is None:
-        lyrics_dict = string_to_dict(lyrics)
-    if user_dict["Total Words"] == 0 or lyrics_dict["Total Words"] == 0:
-        return 0
-    sim = -1 * user_dict["Total Words"] * lyrics_dict["Total Words"]
-    for word in user_dict:
-        if word in lyrics_dict:
-            sim += user_dict[word] * lyrics_dict[word]
-    return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
 
 # returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
 def get_playlist(origin, destination, genres, keywords):
