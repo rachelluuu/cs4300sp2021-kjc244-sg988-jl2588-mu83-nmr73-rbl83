@@ -19,7 +19,11 @@ function InputForm(props) {
         'destination': destination,
         'genres': genres,
         'keywords': keywords
-      })).then(res => res.json()).then(data => {
+      })).then(res => {
+        const promise = res.json();
+        //console.log(promise);
+        return promise;
+        }).then(data => {
         console.log(data);
         props.setError(data.error);
         props.setResults(data.playlist);

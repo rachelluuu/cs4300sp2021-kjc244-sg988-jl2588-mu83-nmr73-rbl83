@@ -14,11 +14,6 @@ function Results(props) {
     else {
       return <div>
         <h2 className="font-customStack text-4xl pb-3 text-center lg:pt-12 lg:pb-12">🎶 your playlist</h2>
-        <div className="grid lg:grid-cols-6 lg:gap-1 mb-3 bg-white lg:px-5 lg:py-5 lg:w-2/3 mx-auto">
-          <div>Rank</div>
-          <div className="lg:col-span-4">Song</div>
-          <div>Score</div>
-        </div>
       </div>
     }
   }
