@@ -132,7 +132,7 @@ def get_genre_similarity(genre_list):
     with open("genreSVD/genres_compressed.npy", 'rb') as f:
         genres_compressed = np.load(f)
     if genre_list == ['']:
-        return np.zeros(len(genres_compressed))
+        return [0]*len(genres_compressed)
     with open("genreSVD/genre_to_idx.json") as json_file:
         genre_to_idx = json.load(json_file)
     scores = np.asarray([genres_compressed.dot(genres_compressed[genre_to_idx[genre],:]) for genre in genre_list])
