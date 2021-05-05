@@ -66,6 +66,9 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
       return sim, line_dict["Total Words"]
 
     key_dict = string_to_dict(keywords)
+
+    if lyrics is None:
+        lyrics = ""
     lines = lyrics.split('\n')
     relevant_lyrics = ""
     best_score = 0
@@ -92,7 +95,7 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
       total_genre_score = genre_weight_cutoff
     sim += np.log(total_genre_score)
 
-    return sim, relevant_lyrics
+    return (sim, relevant_lyrics)
 
 def sim_score2(genre_scores, keywords, lyrics, popularity, song_genres):
     #genre_scores: a dict w/ key=genre name, val=score, outputted from Rachel and Vladia's code
@@ -128,6 +131,8 @@ def sim_score2(genre_scores, keywords, lyrics, popularity, song_genres):
 def get_genre_similarity(genre_list):
     with open("genreSVD/genres_compressed.npy", 'rb') as f:
         genres_compressed = np.load(f)
+    if genre_list == ['']:
+        return np.zeros(len(genres_compressed))
     with open("genreSVD/genre_to_idx.json") as json_file:
         genre_to_idx = json.load(json_file)
     scores = np.asarray([genres_compressed.dot(genres_compressed[genre_to_idx[genre],:]) for genre in genre_list])
@@ -205,8 +210,8 @@ def get_similarity_list(songs_by_location, genres, keywords, seen_songs=set()):
     for index, (song_info, lyric) in enumerate(song_lyrics):
         popularity = song_info["pyongs_count"]
         genres = song_genres[index]
-        similarity = sim_score2(genre_scores, keywords, lyric, popularity, genres)
-        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity))
+        (similarity,lyric) = sim_score_final(genre_scores, keywords, lyric, popularity, genres)
+        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity, lyric))
     return sorted(song_scores, key=lambda x: x[2], reverse=True)
 
 # returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
