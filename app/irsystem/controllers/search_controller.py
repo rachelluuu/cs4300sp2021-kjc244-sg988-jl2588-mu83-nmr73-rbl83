@@ -88,12 +88,18 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
     sim = np.log(sim+.1) - np.log(string_to_dict(lyrics)["Total Words"])
     sim += np.log(np.log(popularity + 1) + .1) #double log so it's not weighted too much'
 
-    total_genre_score = 0
+    genre_score = 0
     if len(song_genres) > 0:
-      total_genre_score = sum([genre_scores[genre] for genre in song_genres if genre in genre_scores])
-    if total_genre_score < genre_weight_cutoff:
-      total_genre_score = genre_weight_cutoff
-    sim += np.log(total_genre_score)
+      relevant_scores = [genre_scores[genre] for genre in song_genres if genre in genre_scores]
+      if len(relevant_scores) > 0:
+        genre_score = np.mean(relevant_scores)
+        if genre_score > .95:
+          genre_score = .95
+        if genre_score < -.95:
+          genre_score = -.95
+      else:
+        genre_score = 0
+    sim += np.tan(genre_score * np.pi / 2)
 
     return (sim, relevant_lyrics)
 
