@@ -45,6 +45,9 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
     #lyrics = get_lyrics(song['title'], song['primary_artist']['name'])
     #popularity = song['pyongs_count'] + .1 # to avoid multiplying by 0
 
+    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby'}
+    song_stopwords = set(stopwords.words('english')).union(riff_words)
+
     syn_weight = .2
     word_match_weight = 1.0
     genre_weight_cutoff = .01
@@ -52,8 +55,9 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
     def dot_score(key_dict, line):
       line_dict = string_to_dict(line)
       sim = -1 * (word_match_weight - syn_weight) * key_dict["Total Words"] * line_dict["Total Words"] #cancels out to 0
-      print(key_dict, line_dict)
       for word in key_dict:
+        if word in song_stopwords:
+          continue
         if word in line_dict:
             sim += (word_match_weight - syn_weight) * key_dict[word] * line_dict[word]
         for syn in get_syn(word):
@@ -65,7 +69,7 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
     lines = lyrics.split('\n')
     relevant_lyrics = ""
     best_score = 0
-    if len(lines) == 0:
+    if len(lines) == 1 and lines[0] == "":
       return -1 * float('inf'), ""
     if popularity is None:
       popularity = 0
@@ -73,8 +77,8 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
     sim = 0
     for line in lines:
       curr_score, line_len = dot_score(key_dict, line)
-      if curr_score / line_len > best_score:
-        best_score = curr_score
+      if line_len != 0 and curr_score / line_len > best_score:
+        best_score = curr_score / line_len
         relevant_lyrics = line
       sim += curr_score
 
