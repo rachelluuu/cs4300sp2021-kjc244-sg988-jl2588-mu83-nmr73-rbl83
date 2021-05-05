@@ -9,21 +9,13 @@ import os
 project_name = "Playground"
 net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu: rbl83\nVladia Trinh: vt95"
 
-@irsystem.route('/', methods=['GET'])
+# @irsystem.route('/', methods=['GET'])
 def render():
   return render_template('index.html')
 
 def songs_at_loc(loc1, loc2):
-    #loc1 = loc1.replace(" ", "%20")
-    #loc2 = loc2.replace(" ", "%20")
     songs1 = []
     songs2 = []
-    #for i in range(1, 4):
-    #    response1 = requests.get("https://genius.com/api/search/lyrics?q=" + loc1 + "&page=" + str(i))
-    #    songs1 += response1.json()['response']['sections'][0]['hits']
-    #    response2 = requests.get("https://genius.com/api/search/lyrics?q=" + loc2 + "&page=" + str(i))
-    #    songs2 += response2.json()['response']['sections'][0]['hits']
-    #filename = os.path.join(irsystem.static_folder, 'top_100_cities.json')
     with open('top_100_cities.json') as cities_file:
         data = json.load(cities_file)
         songs1 = data[loc1.lower()]
@@ -31,12 +23,76 @@ def songs_at_loc(loc1, loc2):
     songsall = songs1+songs2
     return songsall
 
+def songs_at_oneloc(loc1):
+    songs1 = []
+    with open('top_100_cities.json') as cities_file:
+        data = json.load(cities_file)
+        songs1 = data[loc1.lower()]
+    return songs1
+
 def get_syn(word): #necessary new helper function
   synonyms = set()
   for syn in wordnet.synsets(word):
     for l in syn.lemmas():
       synonyms.add(l.name())
   return synonyms
+
+def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
+    #genre_scores: a dict w/ key=genre name, val=score, outputted from Rachel and Vladia's code
+    #keywords: string, exactly what's put in by the user in that section
+    #song: json, directly from Jyne's JSON file, containing info about the song
+    #song_genres: a list of the genres that this song was classified into
+    #lyrics = get_lyrics(song['title'], song['primary_artist']['name'])
+    #popularity = song['pyongs_count'] + .1 # to avoid multiplying by 0
+
+    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby'}
+    song_stopwords = set(stopwords.words('english')).union(riff_words)
+
+    syn_weight = .2
+    word_match_weight = 1.0
+    genre_weight_cutoff = .01
+
+    def dot_score(key_dict, line):
+      line_dict = string_to_dict(line)
+      sim = -1 * (word_match_weight - syn_weight) * key_dict["Total Words"] * line_dict["Total Words"] #cancels out to 0
+      for word in key_dict:
+        if word in song_stopwords:
+          continue
+        if word in line_dict:
+            sim += (word_match_weight - syn_weight) * key_dict[word] * line_dict[word]
+        for syn in get_syn(word):
+            if syn in line_dict:
+              sim += syn_weight * key_dict[word] * line_dict[syn]
+      return sim, line_dict["Total Words"]
+
+    key_dict = string_to_dict(keywords)
+    lines = lyrics.split('\n')
+    relevant_lyrics = ""
+    best_score = 0
+    if len(lines) == 1 and lines[0] == "":
+      return -1 * float('inf'), ""
+    if popularity is None:
+      popularity = 0
+
+    sim = 0
+    for line in lines:
+      curr_score, line_len = dot_score(key_dict, line)
+      if line_len != 0 and curr_score / line_len > best_score:
+        best_score = curr_score / line_len
+        relevant_lyrics = line
+      sim += curr_score
+
+    sim = np.log(sim+.1) - np.log(string_to_dict(lyrics)["Total Words"])
+    sim += np.log(np.log(popularity + 1) + .1) #double log so it's not weighted too much'
+
+    total_genre_score = 0
+    if len(song_genres) > 0:
+      total_genre_score = sum([genre_scores[genre] for genre in song_genres if genre in genre_scores])
+    if total_genre_score < genre_weight_cutoff:
+      total_genre_score = genre_weight_cutoff
+    sim += np.log(total_genre_score)
+
+    return sim, relevant_lyrics
 
 def sim_score2(genre_scores, keywords, lyrics, popularity, song_genres):
     #genre_scores: a dict w/ key=genre name, val=score, outputted from Rachel and Vladia's code
@@ -89,62 +145,54 @@ def get_lyrics(track, artist):
     except:
         return None
 
-def naive_tokenizer(str_in):
-    str_in = str_in.lower()
-    for token in ['\n', '-', '-', "–", '!', '.', ',', '(', ')']:
-        str_in = str_in.replace(token, " ")
-    return str_in.split()
+def get_toks(input): #necessary updated helper function
+    output = []
+    for toks in [list(map(str.lower, word_tokenize(sent))) for sent in sent_tokenize(input)]:
+      output += toks
+    return output
 
-def string_to_dict(str_in, tokenizer=naive_tokenizer):
+def string_to_dict(str_in, tokenizer=get_toks): #necessary updated helper function
+    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby'}
+    song_stopwords = set(stopwords.words('english')).union(riff_words)
     if str_in is None:
         return {"Total Words":0}
     ans = dict()
     i = -1
+    stopword_count = 0
     for i, word in enumerate(tokenizer(str_in)):
+        if word in song_stopwords:
+          stopword_count += 1
+          continue
         if word not in ans:
             ans[word] = 0
         ans[word] += 1
-    ans["Total Words"] = i + 1
+    ans["Total Words"] = i + 1 - stopword_count
     return ans
 
-def sim_score(genre_scores, keywords, lyrics, user_dict=None, lyrics_dict=None, tokenizer=naive_tokenizer):
-    # lyrics is a string of the song, the untokenized outpyt from get_lyrics
-    # userinput is whatever unprocessed string the user sent us
-    
-    # TODO: Some things I would eventually like to do:
-    # 1. Use word embeddings to calculate similarities instead of strings
-    # 2. Use nltk to strip stopwords (modified for songs; e.x. ooh, oh, yeah, yuh, ah, mm, hmm, hey)
-    if user_dict is None:
-        user_dict = string_to_dict(keywords)
-    if lyrics_dict is None:
-        lyrics_dict = string_to_dict(lyrics)
-    if user_dict["Total Words"] == 0 or lyrics_dict["Total Words"] == 0:
-        return 0
-    sim = -1 * user_dict["Total Words"] * lyrics_dict["Total Words"]
-    for word in user_dict:
-        if word in lyrics_dict:
-            sim += user_dict[word] * lyrics_dict[word]
-    return sim / (user_dict["Total Words"] * lyrics_dict["Total Words"])
-
-# returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
-def get_playlist(origin, destination, genres, keywords):
-  songs_by_location = songs_at_loc(origin,destination)
-  song_lyrics = []
-  with open('song_and_artist_to_lyrics.json') as lyrics_file:
+def get_similarity_list(songs_by_location, genres, keywords, seen_songs=set()):
+    song_lyrics = []
+    if len(seen_songs) > 0:
+        purge_duplicates = []
+        for song in songs_by_location:
+            title = song["title"]
+            if title not in seen_songs:
+                purge_duplicates.append(song)
+        songs_by_location = purge_duplicates
+    with open('song_and_artist_to_lyrics.json') as lyrics_file:
         lyrics_map = json.load(lyrics_file)
         for song in songs_by_location:
             title = song["title"]
+            seen_songs.add(title)
             artist = song["primary_artist"]["name"]
             key = title + " - " + artist
             if key in lyrics_map:
                 song_lyrics.append((song, lyrics_map[key]))
             else:
                 song_lyrics.append((song, None))
-  #song_lyrics = [(song, get_lyrics(song["title"], song["primary_artist"]["name"])) for song in songs_by_location]
-  song_genres = []
-  with open('song_genres.json') as genres_file:
-      genres_map = json.load(genres_file)
-      for song in songs_by_location:
+    song_genres = []
+    with open('song_genres.json') as genres_file:
+        genres_map = json.load(genres_file)
+        for song in songs_by_location:
             title = song["title"]
             artist = song["primary_artist"]["name"]
             key = title + " - " + artist
@@ -152,16 +200,23 @@ def get_playlist(origin, destination, genres, keywords):
                 song_genres.append(genres_map[key])
             else:
                 song_genres.append([])
-  genre_scores = get_genre_similarity(genres)
-  song_scores = []
-  for index, (song_info, lyric) in enumerate(song_lyrics):
-      popularity = song_info["pyongs_count"]
-      genres = song_genres[index]
-      similarity = sim_score2(genre_scores, keywords, lyric, popularity, genres)
-      song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity))
-  #song_scores = sorted([(song["title"], song["primary_artist"]["name"], sim_score(genre_scores, keywords, lyric)) for (song,lyric) in song_lyrics], key=lambda x: x[2], reverse=True)
-  song_scores = sorted(song_scores, key=lambda x: x[2], reverse=True)
-  return song_scores
+    genre_scores = get_genre_similarity(genres)
+    song_scores = []
+    for index, (song_info, lyric) in enumerate(song_lyrics):
+        popularity = song_info["pyongs_count"]
+        genres = song_genres[index]
+        similarity = sim_score2(genre_scores, keywords, lyric, popularity, genres)
+        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity))
+    return sorted(song_scores, key=lambda x: x[2], reverse=True)
+
+# returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
+def get_playlist(origin, destination, genres, keywords):
+  origin_songs = songs_at_oneloc(origin)
+  dest_songs = songs_at_oneloc(destination)
+  seen_songs = set()
+  origin_sim = get_similarity_list(origin_songs, genres, keywords, seen_songs)[:50]
+  dest_sim = get_similarity_list(dest_songs, genres, keywords, seen_songs)[:50]
+  return origin_sim+dest_sim
   
 # the search route that takes in origin, destination, genres and keywords, and outputs a playlist
 @irsystem.route('/search')
