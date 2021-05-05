@@ -9,7 +9,7 @@ import os
 project_name = "Playground"
 net_id = "Michael Noor: mn598\nJoy Chen: jhc287\nJyne Dunbar: jcd322\nRachel Lu: rbl83\nVladia Trinh: vt95"
 
-# @irsystem.route('/', methods=['GET'])
+@irsystem.route('/', methods=['GET'])
 def render():
   return render_template('index.html')
 
@@ -210,8 +210,8 @@ def get_similarity_list(songs_by_location, genres, keywords, seen_songs=set()):
     for index, (song_info, lyric) in enumerate(song_lyrics):
         popularity = song_info["pyongs_count"]
         genres = song_genres[index]
-        (similarity,lyric) = sim_score_final(genre_scores, keywords, lyric, popularity, genres)
-        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity, lyric))
+        (_,lyric) = sim_score_final(genre_scores, keywords, lyric, popularity, genres)
+        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], lyric))
     return sorted(song_scores, key=lambda x: x[2], reverse=True)
 
 # returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
