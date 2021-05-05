@@ -45,7 +45,7 @@ def sim_score_final(genre_scores, keywords, lyrics, popularity, song_genres):
     #lyrics = get_lyrics(song['title'], song['primary_artist']['name'])
     #popularity = song['pyongs_count'] + .1 # to avoid multiplying by 0
 
-    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby'}
+    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby', ','}
     song_stopwords = set(stopwords.words('english')).union(riff_words)
 
     syn_weight = .2
@@ -163,7 +163,7 @@ def get_toks(input): #necessary updated helper function
     return output
 
 def string_to_dict(str_in, tokenizer=get_toks): #necessary updated helper function
-    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby'}
+    riff_words = {'ooh', 'oh', 'ah', 'yeah', 'yuh', 'mm', 'mmm', 'hmm', 'hey', 'baby', ','}
     song_stopwords = set(stopwords.words('english')).union(riff_words)
     if str_in is None:
         return {"Total Words":0}
