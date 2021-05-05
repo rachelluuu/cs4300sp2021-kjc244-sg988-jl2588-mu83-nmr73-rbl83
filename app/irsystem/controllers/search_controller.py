@@ -210,8 +210,8 @@ def get_similarity_list(songs_by_location, genres, keywords, seen_songs=set()):
     for index, (song_info, lyric) in enumerate(song_lyrics):
         popularity = song_info["pyongs_count"]
         genres = song_genres[index]
-        (_,lyric) = sim_score_final(genre_scores, keywords, lyric, popularity, genres)
-        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], lyric))
+        (similarity,lyric) = sim_score_final(genre_scores, keywords, lyric, popularity, genres)
+        song_scores.append((song_info["title"], song_info["primary_artist"]["name"], similarity, lyric))
     return sorted(song_scores, key=lambda x: x[2], reverse=True)
 
 # returns a ranked playlist of song titles and artists given a origin, destination, genres, and keywords
@@ -236,4 +236,6 @@ def search():
 		error_msg = 'Make sure to put in an orgin and destination'
 
 	playlist = get_playlist(origin, destination, genres, keywords)
-	return {'error': error_msg, 'playlist': playlist}
+  # remove similarity from items in list
+	playlist = map(lambda x: (x[0], x[1], x[3]), playlist)
+	return {'error': error_msg, 'playlist': list(playlist)}
